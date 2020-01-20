@@ -1,0 +1,53 @@
+import numpy as np
+import pandas as pd
+import matplotlib as plt
+import quandl
+import math
+from sklearn import preprocessing, model_selection, svm
+from sklearn.linear_model import LinearRegression
+
+
+# =============================================================================
+# First we import the data and get our dataframe in order
+# =============================================================================
+df = quandl.get("WIKI/GOOGL")   #Only goes till 2018 but its good enough
+
+df = df[["Adj. Open","Adj. High","Adj. Low","Adj. Close","Adj. Volume"]]
+
+df["Percent Volatility"] = (df["Adj. High"] - df["Adj. Close"])/df["Adj. Close"]
+
+df["Percent Change"] = (df["Adj. Close"] - df["Adj. Open"])/df["Adj. Open"]
+
+df = df[["Adj. Close", "Percent Volatility", "Percent Change", "Adj. Volume"]]
+
+df.fillna(-99999, inplace = True)   #Thus nan will just become outliers and not really affect the model
+
+
+# =============================================================================
+# Now we get our training and testing sets ready
+# =============================================================================
+forecastCol = "Adj. Close"
+
+forecastOut = int(math.ceil(0.001 * len(df)))   #Gives 4 --> 4 nan generated
+
+df["label"] = df[forecastCol].shift(-forecastOut)   #What we want our model to think is right
+df.dropna(inplace = True)
+
+X = np.array(df.drop(["label"], 1))
+y = np.array(df["label"])
+
+X = preprocessing.scale(X)  #Remember to scale with everything else. In essence, this ensures the data is randomized, normalized and unbiased
+df.dropna(inplace = True)
+y = np.array(df["label"])
+
+X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.2)    #20% of the data is for testing
+
+
+# =============================================================================
+# Finally, we test the data
+# =============================================================================
+classifier = LinearRegression()
+
+classifier.fit(X_train, y_train)
+
+print("My score is: " + str(classifier.score(X_test, y_test)))
