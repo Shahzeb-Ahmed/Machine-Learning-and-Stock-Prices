@@ -68,9 +68,9 @@ lastUnix = lastDate.timestamp()
 nextUnix = lastUnix + 86400
 
 for i in forecastSet:       #All this does is put dates on the axes when we plot the data
-    nextDate = datetime.datetime.fromtimestamp(nextUnix)        #Need to understand this fully
+    nextDate = datetime.datetime.fromtimestamp(nextUnix)
     nextUnix += 86400
-    df.loc[nextDate] = [np.nan for _ in range(len(df.columns)-1)] + [i]
+    df.loc[nextDate] = [np.nan for _ in range(len(df.columns)-1)] + [i]        #Need to understand this fully
     
 df["Adj. Close"].plot()
 df["Forecast"].plot()
